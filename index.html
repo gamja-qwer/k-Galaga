@@ -1,0 +1,1716 @@
+
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROKAF 보라매: 대한민국 영공방어선</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for retro/military style -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', 'Orbitron', sans-serif;
+            background-color: #030712;
+            overflow-x: hidden;
+        }
+        canvas {
+            image-rendering: pixelated;
+        }
+        /* Custom Glowing and Animation Effects */
+        .neon-border {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+        }
+        .neon-text-red {
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
+        }
+        .neon-text-green {
+            text-shadow: 0 0 10px rgba(34, 197, 94, 0.8);
+        }
+        .hud-scan {
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 6px 100%;
+        }
+        /* Screen shake effect class */
+        @keyframes shake {
+            0% { transform: translate(0, 0); }
+            10% { transform: translate(-3px, 3px); }
+            20% { transform: translate(3px, -3px); }
+            30% { transform: translate(-2px, -2px); }
+            40% { transform: translate(2px, 2px); }
+            50% { transform: translate(-1px, 3px); }
+            60% { transform: translate(3px, 1px); }
+            70% { transform: translate(-2px, 1px); }
+            80% { transform: translate(2px, -2px); }
+            90% { transform: translate(-1px, -1px); }
+            100% { transform: translate(0, 0); }
+        }
+        .animate-shake {
+            animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both;
+        }
+    </style>
+</head>
+<body class="text-white min-h-screen flex flex-col items-center justify-between hud-scan">
+
+    <!-- TOP HEADER -->
+    <header class="w-full max-w-6xl px-4 py-3 flex justify-between items-center border-b border-slate-800 z-10 bg-slate-950/80 backdrop-blur-md">
+        <div class="flex items-center space-x-3">
+            <!-- ROKAF Mini Roundel Logo inside SVG -->
+            <svg class="w-8 h-8" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="white" stroke-width="3"/>
+                <polygon points="10,50 30,50 40,20 50,50 90,50 70,50 60,80 50,50" fill="#002F6C" stroke="white" stroke-width="2"/>
+                <circle cx="50" cy="50" r="20" fill="#CD2E3A"/>
+                <path d="M 50,50 A 10,10 0 0,0 50,30 A 10,10 0 0,1 50,30" fill="#002F6C" />
+                <path d="M 30,50 C 30,65 70,65 70,50 C 70,35 30,35 30,50" fill="#CD2E3A"/>
+                <path d="M 50,50 C 50,60 50,60 50,50" stroke="#002F6C" stroke-width="2"/>
+            </svg>
+            <div>
+                <h1 class="font-black text-xl tracking-widest text-blue-400 font-mono">ROKAF BORAMAE</h1>
+                <p class="text-[10px] text-slate-400 tracking-wider">REPUBLIC OF KOREA AIR FORCE • GALAGA PROTOCOL</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-4">
+            <!-- Sound Toggle and Retro Display of State -->
+            <button id="soundToggle" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs rounded-full font-mono transition-colors text-blue-300 border border-slate-700">
+                🔈 SOUND: ON
+            </button>
+            <div class="text-right">
+                <div class="text-[10px] text-slate-500 font-mono">CURRENT REGION</div>
+                <div id="currentZone" class="text-xs font-bold text-yellow-500 font-mono">DMZ / SEOUL FLIGHT ZONE</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT GRID -->
+    <main class="w-full max-w-6xl flex-grow grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 items-stretch">
+        
+        <!-- LEFT SIDEBAR: MISSION STATS & PILOT CARD -->
+        <div class="lg:col-span-3 flex flex-col justify-between space-y-4">
+            <!-- Pilot Status Card -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4 flex flex-col space-y-3">
+                <div class="text-xs text-blue-400 font-bold border-b border-blue-900/50 pb-2 flex justify-between">
+                    <span>PILOT PROFILE</span>
+                    <span class="text-slate-500">ROKAF F-12</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-slate-800 border border-blue-500/30 rounded-lg flex items-center justify-center text-2xl relative overflow-hidden">
+                        🇰🇷
+                        <div class="absolute bottom-0 w-full bg-blue-600/60 text-[8px] text-center font-bold">KF-21</div>
+                    </div>
+                    <div>
+                        <div class="font-bold text-sm">참매 (Falcon) 1호기</div>
+                        <div class="text-xs text-emerald-400 font-mono flex items-center">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block mr-1.5 animate-ping"></span>
+                            ACTIVE SERVICE
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-2 pt-2 text-xs font-mono">
+                    <div class="flex justify-between"><span class="text-slate-500">전투기 기종:</span><span class="text-slate-300">KF-21 C-Block</span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">주무장:</span><span class="text-slate-300">20mm 벌컨 / 미티어</span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">AESA 레이더:</span><span class="text-emerald-400">자동 연동 활성</span></div>
+                </div>
+            </div>
+
+            <!-- Mission Parameters & Score Display -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4 flex-grow flex flex-col justify-between">
+                <div>
+                    <div class="text-xs text-yellow-400 font-bold border-b border-yellow-900/50 pb-2 mb-3 font-mono">TACTICAL TELEMETRY</div>
+                    <div class="space-y-3">
+                        <div>
+                            <div class="text-[11px] text-slate-500 mb-1 font-mono">SCORE (점수)</div>
+                            <div id="scoreDisplay" class="text-3xl font-black font-mono text-white tracking-wider">000,000</div>
+                        </div>
+                        <div>
+                            <div class="text-[11px] text-slate-500 mb-1 font-mono">MAX COMBO (최대 연속 격추)</div>
+                            <div id="comboDisplay" class="text-xl font-bold font-mono text-cyan-400">0</div>
+                        </div>
+                        <div>
+                            <div class="text-[11px] text-slate-500 mb-1 font-mono">WAVE (작전 단계)</div>
+                            <div id="waveDisplay" class="text-lg font-bold font-mono text-yellow-500">WAVE 1</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AESA Overkill Charge Gauge UI -->
+                <div class="mt-4 pt-3 border-t border-slate-800">
+                    <div class="flex justify-between text-xs font-mono mb-1.5">
+                        <span class="text-blue-400 font-bold">AESA SCAN CHARGE</span>
+                        <span id="aesaChargeText" class="text-slate-400">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-950 h-3 rounded-full border border-slate-800 p-0.5 overflow-hidden">
+                        <div id="aesaBar" class="bg-gradient-to-r from-blue-600 via-cyan-400 to-emerald-400 h-full rounded-full transition-all duration-300" style="width: 0%;"></div>
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-2 leading-relaxed">적 편대 전멸 시 또는 게이지가 100% 충전되면 AESA 락온 미사일 스킬이 자동 시전됩니다!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CENTER: ARCADE VIEWPORT CANVAS -->
+        <div class="lg:col-span-6 flex flex-col items-center">
+            <!-- Game Wrapper with Retro Screen Bezel -->
+            <div id="canvasContainer" class="relative w-full aspect-[3/4] max-h-[70vh] rounded-2xl overflow-hidden border-2 border-slate-700 bg-black flex items-center justify-center shadow-2xl">
+                <!-- Screen Glass reflection effect -->
+                <div class="absolute inset-0 pointer-events-none bg-gradient-to-tr from-transparent via-white/5 to-transparent z-10"></div>
+                
+                <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+
+                <!-- UI Overlays inside Canvas space (Start Screen / Game Over Screen) -->
+                <div id="startScreen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center z-20">
+                    <!-- Retro Hologram Circle -->
+                    <div class="w-32 h-32 border border-blue-500/30 rounded-full flex items-center justify-center mb-6 relative animate-pulse">
+                        <div class="w-24 h-24 border border-blue-500/50 rounded-full flex items-center justify-center">
+                            <span class="text-4xl">🇰🇷</span>
+                        </div>
+                        <div class="absolute inset-0 border-t-4 border-blue-500 rounded-full animate-spin"></div>
+                    </div>
+                    <h2 class="text-2xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-white to-red-400 font-mono mb-2">ROKAF BORAMAE</h2>
+                    <p class="text-xs text-blue-300 max-w-xs mb-8 leading-relaxed">대한민국 영공을 침입한 미확인 적 편대를 격퇴하십시오! KF-21의 첨단 AESA 시스템을 가동하세요.</p>
+                    
+                    <button id="startGameBtn" class="px-8 py-3 bg-gradient-to-r from-blue-600 to-red-600 hover:from-blue-500 hover:to-red-500 text-sm font-bold tracking-widest rounded-lg neon-border transition-all duration-300 transform hover:scale-105">
+                        작전 개시 (START GAME)
+                    </button>
+                    <p class="text-[10px] text-slate-500 mt-4 font-mono">조작방법: PC [◀ ▶ 또는 A/D] 및 스페이스바 (사격) / 모바일 화면 터치 및 드래그</p>
+                </div>
+
+                <!-- Game Over Overlay -->
+                <div id="gameOverScreen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center z-20 hidden">
+                    <span class="text-6xl mb-4">🚨</span>
+                    <h2 class="text-3xl font-black text-red-500 font-mono tracking-widest mb-1 neon-text-red">MISSION FAILED</h2>
+                    <p class="text-xs text-slate-400 mb-6">기체가 격추되었습니다. 영공이 돌파당했습니다.</p>
+                    
+                    <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-xl mb-8 w-64 text-left font-mono text-sm space-y-2">
+                        <div class="flex justify-between"><span class="text-slate-500">최종 점수:</span><span id="finalScore" class="text-white font-bold">0</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">최고 콤보:</span><span id="finalCombo" class="text-cyan-400 font-bold">0</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">격퇴 편대수:</span><span id="finalWaves" class="text-yellow-500 font-bold">0</span></div>
+                    </div>
+
+                    <button id="restartGameBtn" class="px-8 py-3 bg-slate-800 hover:bg-slate-700 text-xs font-bold tracking-widest rounded-lg border border-slate-700 transition-all transform hover:scale-105">
+                        재출격 (RE-DEPLOY)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Controller Panel (Optimized for Mobile/Touch Playability) -->
+            <div class="w-full mt-4 bg-slate-900/80 border border-slate-800 p-3 rounded-xl flex items-center justify-between lg:hidden z-10">
+                <span class="text-xs text-slate-400 font-mono">📱 모바일 터치 컨트롤: 화면을 드래그하여 이동 (자동 발사)</span>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDEBAR: SANDBOX AND EFFECT CONTROLLERS -->
+        <div class="lg:col-span-3 flex flex-col justify-between space-y-4">
+            
+            <!-- Visual Sandbox Interactive Controls -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4 flex flex-col justify-between h-full">
+                <div>
+                    <div class="text-xs text-red-400 font-bold border-b border-red-900/50 pb-2 mb-3 flex justify-between items-center">
+                        <span>EFX SANDBOX (실시간 연출 테스트)</span>
+                        <span class="px-1.5 py-0.5 bg-red-950 text-red-400 text-[8px] rounded border border-red-800">CHEAT</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mb-4 leading-relaxed">
+                        게임 진행 중 언제든 아래 버튼을 누르면, 구상하신 하이엔드 파괴 연출이 즉각 강제 시연됩니다. 손맛과 피치 상승 리듬감을 테스트해 보세요!
+                    </p>
+
+                    <div class="space-y-3">
+                        <!-- Direct Action Buttons -->
+                        <button id="cheatNormalExplosion" class="w-full text-left p-2.5 bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 rounded-lg flex items-center justify-between transition-all group">
+                            <div class="flex items-center space-x-2.5">
+                                <span class="text-lg">💥</span>
+                                <div>
+                                    <div class="text-xs font-bold text-slate-200 group-hover:text-blue-400">1. 기본 적기 격추</div>
+                                    <div class="text-[9px] text-slate-500">작은 섬광/기체 동체분리/연기 (0.15s)</div>
+                                </div>
+                            </div>
+                            <span class="text-[10px] text-slate-500 font-mono">PLAY</span>
+                        </button>
+
+                        <button id="cheatChainExplosion" class="w-full text-left p-2.5 bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 rounded-lg flex items-center justify-between transition-all group">
+                            <div class="flex items-center space-x-2.5">
+                                <span class="text-lg">🔥</span>
+                                <div>
+                                    <div class="text-xs font-bold text-slate-200 group-hover:text-yellow-400">2. 편대 연쇄 격추</div>
+                                    <div class="text-[9px] text-slate-500">팡!↘ 팡!↘ 팡! (리듬 피치 상승, 흔들림)</div>
+                                </div>
+                            </div>
+                            <span class="text-[10px] text-slate-500 font-mono">PLAY</span>
+                        </button>
+
+                        <button id="cheatAesaOverkill" class="w-full text-left p-2.5 bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 rounded-lg flex items-center justify-between transition-all group">
+                            <div class="flex items-center space-x-2.5">
+                                <span class="text-lg">📡</span>
+                                <div>
+                                    <div class="text-xs font-bold text-slate-200 group-hover:text-cyan-400">3. KF-21 AESA 오버킬</div>
+                                    <div class="text-[9px] text-slate-500">녹색 스캔선/빨간 락온/미사일 일제소탕</div>
+                                </div>
+                            </div>
+                            <span class="text-[10px] text-slate-500 font-mono font-bold text-cyan-500">ULTIMATE</span>
+                        </button>
+
+                        <button id="cheatBossSpawn" class="w-full text-left p-2.5 bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 rounded-lg flex items-center justify-between transition-all group">
+                            <div class="flex items-center space-x-2.5">
+                                <span class="text-lg">🛸</span>
+                                <div>
+                                    <div class="text-xs font-bold text-slate-200 group-hover:text-red-400">4. 보스 등장 & 5단 폭발</div>
+                                    <div class="text-[9px] text-slate-500">장갑파손→화재→추락→지면충돌→대폭발</div>
+                                </div>
+                            </div>
+                            <span class="text-[10px] text-slate-500 font-mono">SPAWN</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Simulation Settings sliders -->
+                <div class="mt-4 pt-3 border-t border-slate-800 space-y-3">
+                    <div class="text-xs font-bold text-slate-400 mb-1">EFFECT ADJUSTMENTS (실시간 조절)</div>
+                    
+                    <div>
+                        <div class="flex justify-between text-[11px] text-slate-500 mb-1">
+                            <span>연쇄폭발 딜레이</span>
+                            <span id="delayValue" class="font-mono text-blue-400">80ms</span>
+                        </div>
+                        <input type="range" id="delaySlider" min="40" max="250" value="80" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-[11px] text-slate-500 mb-1">
+                            <span>이펙트 비율 (첨단 테크 : 밀리터리)</span>
+                            <span id="ratioValue" class="font-mono text-blue-400">20% : 80%</span>
+                        </div>
+                        <input type="range" id="ratioSlider" min="0" max="50" value="20" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- FOOTER WITH STATS -->
+    <footer class="w-full max-w-6xl px-4 py-3 border-t border-slate-900 bg-slate-950/50 text-center text-[11px] text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-2">
+        <p>© 2026 ROKAF Boramae Retro Arcade Project. All rights reserved.</p>
+        <p class="font-mono text-slate-400">MILITARY: 70% | DIGITAL: 20% | CINEMATIC SHAKE: 10%</p>
+    </footer>
+
+    <script>
+        // Touch Interaction Support for Mobile
+        let touchX = null;
+        canvas.addEventListener('touchstart', (e) => {
+            if (!gameState.running) return;
+            const rect = canvas.getBoundingClientRect();
+            touchX = e.touches[0].clientX - rect.left;
+        }, { passive: true });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (!gameState.running) return;
+            const rect = canvas.getBoundingClientRect();
+            const currentX = e.touches[0].clientX - rect.left;
+            
+            // Map logic scale
+            const scaleX = LOGICAL_WIDTH / rect.width;
+            player.x = currentX * scaleX;
+            // Bound check
+            if (player.x < player.width/2) player.x = player.width/2;
+            if (player.x > LOGICAL_WIDTH - player.width/2) player.x = LOGICAL_WIDTH - player.width/2;
+            
+            // Auto fire in mobile mode
+            player.autoFireCounter++;
+            if (player.autoFireCounter % 6 === 0) {
+                player.shoot();
+            }
+        }, { passive: true });
+
+        canvas.addEventListener('touchend', () => {
+            touchX = null;
+        }, { passive: true });
+    </script>
+
+    <script>
+        // Terrain Background Scroller Rendering ROKAF Theme Map
+        class Background {
+            constructor() {
+                this.y = 0;
+                this.speed = 1.0;
+                
+                // Define procedural terrain layers for rich parallax / tactical depth
+                // Topography: Mountains, Cities, and Coastlines
+                this.elements = [
+                    // Coastlines & Islands (Scrolling vectors)
+                    { type: 'island', name: '독도 (Dokdo)', x: 360, y: 150, scale: 1.2, isDokdo: true },
+                    { type: 'island', name: '울릉도 (Ulleungdo)', x: 310, y: 50, scale: 1.5 },
+                    { type: 'island', name: '제주도 (Jeju Island)', x: 120, y: -450, scale: 3.5, isJeju: true },
+                    
+                    // Landmarks & Strategic Points
+                    { type: 'landmark', subtype: 'tower', name: 'N서울타워 (Seoul Tower)', x: 150, y: 300, scale: 1.0 },
+                    { type: 'landmark', subtype: 'bridge', name: '부산 광안대교 (Busan)', x: 280, y: -150, scale: 1.1 },
+                    
+                    // Tactical Lines / Borders
+                    { type: 'border', name: 'DMZ 군사분계선 (MILITARY DEMARCATION LINE)', y: -80, color: 'rgba(239, 68, 68, 0.4)' },
+                    { type: 'border', name: 'NLL 북방한계선 (NORTHERN LIMIT LINE)', y: -280, color: 'rgba(59, 130, 246, 0.4)', isDashed: true }
+                ];
+
+                // Procedural mountain peaks for 3D parallax effect (Taebaek range)
+                this.mountains = [];
+                for (let i = 0; i < 8; i++) {
+                    this.mountains.push({
+                        x: 50 + Math.random() * (LOGICAL_WIDTH - 100),
+                        y: Math.random() * LOGICAL_HEIGHT,
+                        width: 40 + Math.random() * 40,
+                        height: 25 + Math.random() * 30,
+                        speedMult: 0.7 + Math.random() * 0.3 // parallax depth
+                    });
+                }
+
+                // Grid nodes for futuristic cyber radar aesthetic
+                this.cyberGrids = [];
+                for (let i = 0; i < 5; i++) {
+                    this.cyberGrids.push({
+                        x: Math.random() * LOGICAL_WIDTH,
+                        y: Math.random() * LOGICAL_HEIGHT,
+                        size: 30 + Math.random() * 50,
+                        pulse: Math.random() * Math.PI
+                    });
+                }
+            }
+
+            update() {
+                this.y = (this.y + this.speed) % LOGICAL_HEIGHT;
+
+                // Scroll the mountains (Parallax)
+                this.mountains.forEach(m => {
+                    m.y += this.speed * m.speedMult;
+                    if (m.y > LOGICAL_HEIGHT + m.height) {
+                        m.y = -m.height;
+                        m.x = 50 + Math.random() * (LOGICAL_WIDTH - 100);
+                    }
+                });
+
+                // Scroll the specific tactical elements
+                this.elements.forEach(el => {
+                    if (el.type === 'border') {
+                        el.y += this.speed;
+                        if (el.y > LOGICAL_HEIGHT + 100) {
+                            el.y = -600; // Reset way back up
+                        }
+                    } else {
+                        el.y += this.speed;
+                        if (el.y > LOGICAL_HEIGHT + 200) {
+                            el.y = -400 - Math.random() * 300;
+                            el.x = 40 + Math.random() * (LOGICAL_WIDTH - 80);
+                        }
+                    }
+                });
+
+                // Update cyber grid pulses
+                this.cyberGrids.forEach(g => {
+                    g.y += this.speed * 0.5;
+                    g.pulse += 0.02;
+                    if (g.y > LOGICAL_HEIGHT + 100) {
+                        g.y = -100;
+                        g.x = Math.random() * LOGICAL_WIDTH;
+                    }
+                });
+            }
+
+            draw() {
+                // Space/Navy tactical cockpit view background
+                ctx.fillStyle = '#020617';
+                ctx.fillRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+
+                // 1. Draw glowing digital grid pattern (underneath everything)
+                ctx.strokeStyle = 'rgba(16, 185, 129, 0.04)';
+                ctx.lineWidth = 1;
+                const gridOffset = Math.floor(this.y) % 40;
+                for (let x = 0; x < LOGICAL_WIDTH; x += 40) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, LOGICAL_HEIGHT);
+                    ctx.stroke();
+                }
+                for (let y = gridOffset; y < LOGICAL_HEIGHT; y += 40) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(LOGICAL_WIDTH, y);
+                    ctx.stroke();
+                }
+
+                // 2. Draw procedural cyber-scans (concentric tactical radar grids)
+                this.cyberGrids.forEach(g => {
+                    ctx.strokeStyle = 'rgba(14, 165, 233, 0.05)';
+                    ctx.beginPath();
+                    const radius = g.size * (1 + Math.sin(g.pulse) * 0.1);
+                    ctx.arc(g.x, g.y, radius, 0, Math.PI * 2);
+                    ctx.stroke();
+                    
+                    // Center point
+                    ctx.fillStyle = 'rgba(14, 165, 233, 0.15)';
+                    ctx.fillRect(g.x - 2, g.y - 2, 4, 4);
+                });
+
+                // 3. Draw wireframe mountain peaks (Taebaek Mountain Range parallax)
+                ctx.strokeStyle = 'rgba(16, 185, 129, 0.07)';
+                ctx.fillStyle = 'rgba(6, 78, 59, 0.04)';
+                ctx.lineWidth = 1.5;
+                this.mountains.forEach(m => {
+                    ctx.beginPath();
+                    ctx.moveTo(m.x - m.width, m.y);
+                    ctx.lineTo(m.x, m.y - m.height);
+                    ctx.lineTo(m.x + m.width, m.y);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Draw peak radar altitude indicators
+                    ctx.fillStyle = 'rgba(16, 185, 129, 0.15)';
+                    ctx.font = '6px monospace';
+                    ctx.fillText(`ELV:${Math.round(m.height * 50)}M`, m.x - 18, m.y - m.height - 4);
+                });
+
+                // 4. Draw Islands and Coastlines
+                this.elements.forEach(el => {
+                    if (el.type === 'island') {
+                        ctx.save();
+                        ctx.translate(el.x, el.y);
+
+                        // Glowing shallow sea outline
+                        ctx.fillStyle = 'rgba(14, 116, 144, 0.1)';
+                        ctx.strokeStyle = 'rgba(6, 182, 212, 0.15)';
+                        ctx.lineWidth = 1;
+
+                        if (el.isDokdo) {
+                            // Draw East Island (동도)
+                            ctx.beginPath();
+                            ctx.arc(-10, 0, 10 * el.scale, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.stroke();
+
+                            // Draw West Island (서도)
+                            ctx.beginPath();
+                            ctx.arc(10, 5, 8 * el.scale, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.stroke();
+
+                            // ROKAF Dokdo Patrol Radar Circle
+                            ctx.strokeStyle = 'rgba(239, 68, 68, 0.2)';
+                            ctx.setLineDash([2, 4]);
+                            ctx.beginPath();
+                            ctx.arc(0, 0, 35, 0, Math.PI * 2);
+                            ctx.stroke();
+                            ctx.setLineDash([]);
+                        } else if (el.isJeju) {
+                            // Jeju Hallasan Shield Volcano outline
+                            ctx.beginPath();
+                            ctx.ellipse(0, 0, 30 * el.scale, 15 * el.scale, 0, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.stroke();
+
+                            // Volcanic Crater (Baengnokdam) inside
+                            ctx.strokeStyle = 'rgba(16, 185, 129, 0.3)';
+                            ctx.beginPath();
+                            ctx.ellipse(0, -2, 6 * el.scale, 3 * el.scale, 0, 0, Math.PI * 2);
+                            ctx.stroke();
+                        } else {
+                            // Standard generic island silhouette
+                            ctx.beginPath();
+                            ctx.ellipse(0, 0, 12 * el.scale, 8 * el.scale, Math.PI / 4, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.stroke();
+                        }
+
+                        // Tactical HUD Label
+                        ctx.fillStyle = 'rgba(56, 189, 248, 0.5)';
+                        ctx.font = '8px Orbitron, sans-serif';
+                        ctx.fillText(el.name, -el.name.length * 2, 24);
+
+                        ctx.restore();
+                    }
+
+                    // 5. Draw Tactical Borders (DMZ & NLL)
+                    else if (el.type === 'border') {
+                        ctx.strokeStyle = el.color;
+                        ctx.lineWidth = 2;
+                        if (el.isDashed) {
+                            ctx.setLineDash([6, 6]);
+                        }
+
+                        // Drawing a zig-zag tactical fence/limit line
+                        ctx.beginPath();
+                        ctx.moveTo(0, el.y);
+                        for (let x = 0; x <= LOGICAL_WIDTH; x += 50) {
+                            const waveY = el.y + Math.sin(x * 0.05) * 8;
+                            ctx.lineTo(x, waveY);
+                        }
+                        ctx.stroke();
+                        ctx.setLineDash([]); // Reset
+
+                        // Draw military marker labels
+                        ctx.fillStyle = el.color;
+                        ctx.font = '7px Orbitron, sans-serif';
+                        ctx.fillText(`▲ SECURITY ZONE: ${el.name}`, 15, el.y - 8);
+                    }
+
+                    // 6. Draw Vector Landmarks (N Seoul Tower / Busan Bridge)
+                    else if (el.type === 'landmark') {
+                        ctx.save();
+                        ctx.translate(el.x, el.y);
+
+                        if (el.subtype === 'tower') {
+                            // Draw vector Seoul Tower
+                            ctx.strokeStyle = 'rgba(245, 158, 11, 0.4)';
+                            ctx.fillStyle = 'rgba(245, 158, 11, 0.1)';
+                            ctx.lineWidth = 1.5;
+
+                            ctx.beginPath();
+                            ctx.moveTo(-15, 20); // Base hills
+                            ctx.lineTo(15, 20);
+                            ctx.moveTo(-4, 20); // Tower frame
+                            ctx.lineTo(-2, -15);
+                            ctx.lineTo(2, -15);
+                            ctx.lineTo(4, 20);
+                            ctx.moveTo(-10, -5); // Observatory deck
+                            ctx.lineTo(10, -5);
+                            ctx.lineTo(6, -12);
+                            ctx.lineTo(-6, -12);
+                            ctx.closePath();
+                            ctx.fill();
+                            ctx.stroke();
+
+                            // Spire glow point
+                            ctx.fillStyle = '#ef4444';
+                            ctx.beginPath();
+                            ctx.arc(0, -18, 2.5, 0, Math.PI * 2);
+                            ctx.fill();
+                        } 
+                        else if (el.subtype === 'bridge') {
+                            // Gwangan Bridge Vector suspension design
+                            ctx.strokeStyle = 'rgba(14, 165, 233, 0.4)';
+                            ctx.fillStyle = 'rgba(14, 165, 233, 0.05)';
+                            ctx.lineWidth = 1;
+
+                            ctx.beginPath();
+                            // Main deck
+                            ctx.moveTo(-40, 15);
+                            ctx.lineTo(40, 15);
+                            // Towers
+                            ctx.moveTo(-20, 15); ctx.lineTo(-20, -15);
+                            ctx.moveTo(20, 15); ctx.lineTo(20, -15);
+                            // Suspension Cables
+                            ctx.moveTo(-40, 15);
+                            ctx.quadraticCurveTo(-20, -10, 0, 15);
+                            ctx.moveTo(0, 15);
+                            ctx.quadraticCurveTo(20, -10, 40, 15);
+                            ctx.stroke();
+                        }
+
+                        // HUD Text tag
+                        ctx.fillStyle = 'rgba(245, 158, 11, 0.6)';
+                        ctx.font = '8px Orbitron, sans-serif';
+                        ctx.fillText(el.name, -el.name.length * 2, 32);
+
+                        ctx.restore();
+                    }
+                });
+            }
+        }
+
+        // KF-21 Player Fighter
+        class Player {
+            constructor() {
+                this.width = 32;
+                this.height = 36;
+                this.x = LOGICAL_WIDTH / 2;
+                this.y = LOGICAL_HEIGHT - 60;
+                this.speed = 4.5;
+                this.cooldown = 0;
+                this.autoFireCounter = 0;
+                this.lives = 3;
+            }
+
+            update() {
+                if (keys.ArrowLeft) {
+                    this.x -= this.speed;
+                    if (this.x < this.width/2) this.x = this.width/2;
+                }
+                if (keys.ArrowRight) {
+                    this.x += this.speed;
+                    if (this.x > LOGICAL_WIDTH - this.width/2) this.x = LOGICAL_WIDTH - this.width/2;
+                }
+                if (keys.Space && this.cooldown === 0) {
+                    this.shoot();
+                }
+                if (this.cooldown > 0) this.cooldown--;
+            }
+
+            shoot() {
+                AudioSys.playShoot();
+                // Classic retro dual blaster
+                bullets.push(new Bullet(this.x - 8, this.y - 12, -8));
+                bullets.push(new Bullet(this.x + 8, this.y - 12, -8));
+                this.cooldown = 12; // speed of fire
+            }
+
+            draw() {
+                // Drawing the KF-21 Fighter using Canvas Vector Paths (Grey military style)
+                ctx.save();
+                ctx.translate(this.x, this.y);
+
+                // Engine exhaust thruster glow
+                ctx.fillStyle = Math.random() > 0.5 ? '#ff6600' : '#ff3300';
+                ctx.beginPath();
+                ctx.moveTo(-6, 12);
+                ctx.lineTo(-2, 22 + Math.random() * 5);
+                ctx.lineTo(2, 22 + Math.random() * 5);
+                ctx.lineTo(6, 12);
+                ctx.closePath();
+                ctx.fill();
+
+                // Main Wing Fuselage
+                ctx.fillStyle = '#64748b'; // Sleek grey military camouflage
+                ctx.strokeStyle = '#475569';
+                ctx.lineWidth = 1;
+
+                ctx.beginPath();
+                ctx.moveTo(0, -18); // Nose cone
+                ctx.lineTo(5, -6);
+                ctx.lineTo(24, 6);   // Right wing tip
+                ctx.lineTo(18, 10);
+                ctx.lineTo(6, 6);
+                ctx.lineTo(4, 15);   // Twin Tail Right
+                ctx.lineTo(8, 18);
+                ctx.lineTo(0, 14);   // Tail center
+                ctx.lineTo(-8, 18);  // Twin Tail Left
+                ctx.lineTo(-4, 15);
+                ctx.lineTo(-6, 6);
+                ctx.lineTo(-18, 10);
+                ctx.lineTo(-24, 6);  // Left wing tip
+                ctx.lineTo(-5, -6);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                // Taegeuk ROKAF Roundel graphic on wings
+                ctx.fillStyle = '#1e3a8a'; // Navy base circle
+                ctx.beginPath();
+                ctx.arc(-10, 5, 4, 0, Math.PI * 2);
+                ctx.arc(10, 5, 4, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#ef4444'; // Red half
+                ctx.beginPath();
+                ctx.arc(-10, 5, 2.5, Math.PI, 0);
+                ctx.arc(10, 5, 2.5, Math.PI, 0);
+                ctx.fill();
+
+                ctx.fillStyle = '#3b82f6'; // Blue half
+                ctx.beginPath();
+                ctx.arc(-10, 5, 2.5, 0, Math.PI);
+                ctx.arc(10, 5, 2.5, 0, Math.PI);
+                ctx.fill();
+
+                // Cockpit canopy glass
+                ctx.fillStyle = '#38bdf8';
+                ctx.beginPath();
+                ctx.ellipse(0, -5, 3, 7, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.restore();
+            }
+        }
+
+        // Regular Laser Bullets
+        class Bullet {
+            constructor(x, y, speedY) {
+                this.x = x;
+                this.y = y;
+                this.speedY = speedY;
+                this.width = 3;
+                this.height = 10;
+                this.active = true;
+            }
+
+            update() {
+                this.y += this.speedY;
+                if (this.y < -20) this.active = false;
+            }
+
+            draw() {
+                ctx.fillStyle = '#22c55e'; // Bright green laser bullets
+                ctx.shadowBlur = 4;
+                ctx.shadowColor = '#22c55e';
+                ctx.fillRect(this.x - this.width/2, this.y, this.width, this.height);
+                ctx.shadowBlur = 0; // Reset
+            }
+        }
+    </script>
+
+    <script>
+        // Enemy Fighter Jets
+        class Enemy {
+            constructor(x, y, formationCol, formationRow) {
+                this.x = x;
+                this.y = y;
+                this.originX = x;
+                this.originY = y;
+                this.width = 24;
+                this.height = 24;
+                this.formationCol = formationCol;
+                this.formationRow = formationRow;
+                this.isEntering = true;
+                this.entryProgress = 0;
+                this.hoverOffset = Math.random() * Math.PI * 2;
+                this.isBoss = false;
+                this.health = 1;
+                this.maxHealth = 1;
+                this.points = 100;
+                this.active = true;
+            }
+
+            update() {
+                // Galaga-style entry motion
+                if (this.isEntering) {
+                    this.entryProgress += 0.02;
+                    if (this.entryProgress >= 1) {
+                        this.entryProgress = 1;
+                        this.isEntering = false;
+                    }
+                    // Interpolate bezier path
+                    const startX = (this.formationCol % 2 === 0) ? -50 : LOGICAL_WIDTH + 50;
+                    const startY = 100;
+                    this.x = startX + (this.originX - startX) * this.entryProgress;
+                    this.y = startY + (this.originY - startY) * this.entryProgress;
+                } else {
+                    // Slight gentle hover motion
+                    this.hoverOffset += 0.03;
+                    this.x = this.originX + Math.sin(this.hoverOffset) * 8;
+                    this.y = this.originY + Math.cos(this.hoverOffset) * 4;
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+
+                // Aggressive red/black camo enemy fighter layout
+                ctx.fillStyle = '#1e1b4b'; // Dark blue shadow
+                ctx.strokeStyle = '#ef4444'; // Red dangerous linings
+                ctx.lineWidth = 1;
+
+                ctx.beginPath();
+                ctx.moveTo(0, 10); // Nose cone downwards
+                ctx.lineTo(10, -8);
+                ctx.lineTo(4, -6);
+                ctx.lineTo(0, -12);
+                ctx.lineTo(-4, -6);
+                ctx.lineTo(-10, -8);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                // Enemy engine exhaust
+                ctx.fillStyle = '#f97316';
+                ctx.fillRect(-2, -14, 4, 3);
+
+                ctx.restore();
+            }
+        }
+
+        // Final Stage Boss Aircraft (Huge, multi-stage destruction)
+        class BossAircraft extends Enemy {
+            constructor() {
+                super(LOGICAL_WIDTH/2, -80, 0, 0);
+                this.isBoss = true;
+                this.width = 90;
+                this.height = 60;
+                this.originX = LOGICAL_WIDTH / 2;
+                this.originY = 120;
+                this.health = 40;
+                this.maxHealth = 40;
+                this.points = 5000;
+                this.destructionStage = 0; // 0 to 5
+                this.destructionTimer = 0;
+                this.isDestroying = false;
+                this.shootCooldown = 60;
+            }
+
+            update() {
+                if (this.isDestroying) {
+                    this.updateDestructionSequence();
+                    return;
+                }
+
+                if (this.isEntering) {
+                    this.y += 1.5;
+                    if (this.y >= this.originY) {
+                        this.y = this.originY;
+                        this.isEntering = false;
+                    }
+                } else {
+                    // Boss horizontal pacing sway
+                    this.hoverOffset += 0.015;
+                    this.x = this.originX + Math.sin(this.hoverOffset) * 80;
+                    this.y = this.originY + Math.cos(this.hoverOffset) * 15;
+
+                    // Attack sequence
+                    this.shootCooldown--;
+                    if (this.shootCooldown <= 0) {
+                        this.shootBossProjectiles();
+                        this.shootCooldown = 80;
+                    }
+                }
+            }
+
+            shootBossProjectiles() {
+                if (gameState.aesaScanning) return; // Freeze during scanning
+                // Spray a fan of tactical red bullets
+                for (let angle = -2; angle <= 2; angle++) {
+                    enemyBullets.push(new EnemyBullet(this.x, this.y + 20, angle * 1.2, 4.5));
+                }
+            }
+
+            triggerDestroy() {
+                this.isDestroying = true;
+                this.destructionStage = 1; // Stage 1: Armor Damaged
+                this.destructionTimer = 0;
+                gameState.screenShake = 15;
+                AudioSys.playBossCrash();
+            }
+
+            updateDestructionSequence() {
+                this.destructionTimer++;
+
+                // Triggering sequential damage states
+                // Stage 1: Armor cracked / sparks flying (0 to 30 frames)
+                if (this.destructionStage === 1 && this.destructionTimer > 35) {
+                    this.destructionStage = 2; // Stage 2: Engine Fire
+                    // Heavy persistent smoke emission
+                    for(let i=0; i<15; i++) {
+                        particles.push(new Particle(this.x + (Math.random()-0.5)*40, this.y, 'smoke', 1.5));
+                    }
+                }
+                // Stage 3: Descent and spin out of control (35 to 80 frames)
+                if (this.destructionStage === 2 && this.destructionTimer > 80) {
+                    this.destructionStage = 3; // Stage 3: Fall crash
+                }
+                // Stage 4: Ground Impact at bottom boundary (80 to 140 frames)
+                if (this.destructionStage === 3) {
+                    this.y += 3; // Descent physics
+                    this.x += Math.sin(this.destructionTimer * 0.2) * 4; // Wobbling crash loop
+                    if (this.y >= LOGICAL_HEIGHT - 80) {
+                        this.destructionStage = 4; // Stage 4: Earth Ground Impact
+                        gameState.screenShake = 30; // Extreme ground slam shake
+                    }
+                }
+                // Stage 5: Final Mega Explosion (140+ frames)
+                if (this.destructionStage === 4 && this.destructionTimer > 150) {
+                    this.destructionStage = 5; // Stage 5: Catastrophic Mega Blast
+                    triggerBossMegaBlast(this.x, this.y);
+                    this.active = false;
+                    gameState.bossSpawned = false;
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+
+                // Add shaking to body if falling or breaking apart
+                if (this.isDestroying) {
+                    ctx.translate((Math.random() - 0.5) * 6, (Math.random() - 0.5) * 6);
+                    ctx.rotate(this.destructionTimer * 0.015);
+                }
+
+                // Render Heavy Boss Stealth Fighter Bomber (KF-99 Codename: 'Shadow Claw')
+                ctx.fillStyle = '#0f172a';
+                ctx.strokeStyle = '#ef4444';
+                ctx.lineWidth = 2;
+
+                ctx.beginPath();
+                ctx.moveTo(0, 30); // Heavy nose cone
+                ctx.lineTo(30, 0);
+                ctx.lineTo(45, -15); // Broad delta wings
+                ctx.lineTo(40, -25);
+                ctx.lineTo(15, -20);
+                ctx.lineTo(0, -35); // Double trailing edge engine bays
+                ctx.lineTo(-15, -20);
+                ctx.lineTo(-40, -25);
+                ctx.lineTo(-45, -15);
+                ctx.lineTo(-30, 0);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                // Tech status glows
+                if (this.destructionStage >= 1) {
+                    // Fragment/Armor cracks drawing
+                    ctx.strokeStyle = '#e11d48';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(-30, -5); ctx.lineTo(10, 10);
+                    ctx.moveTo(35, -10); ctx.lineTo(-15, 15);
+                    ctx.stroke();
+                }
+
+                if (this.destructionStage >= 2) {
+                    // Erupting engine fire vectors
+                    ctx.fillStyle = '#ea580c';
+                    ctx.beginPath();
+                    ctx.arc(-15, -15, 12 + Math.random()*8, 0, Math.PI * 2);
+                    ctx.arc(15, -15, 8 + Math.random()*8, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // Draw standard tactical cockpit
+                ctx.fillStyle = '#ef4444';
+                ctx.beginPath();
+                ctx.ellipse(0, 5, 8, 12, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Boss Health bar
+                if (!this.isDestroying) {
+                    ctx.restore();
+                    // Boss UI Health Bar
+                    const barW = 120;
+                    const barH = 5;
+                    const px = this.x - barW/2;
+                    const py = this.y - 45;
+                    ctx.fillStyle = 'rgba(239, 68, 68, 0.2)';
+                    ctx.fillRect(px, py, barW, barH);
+                    const currentPct = Math.max(0, this.health / this.maxHealth);
+                    ctx.fillStyle = '#ef4444';
+                    ctx.fillRect(px, py, barW * currentPct, barH);
+                } else {
+                    ctx.restore();
+                }
+            }
+        }
+
+        // Projectiles fired by Boss/Enemy
+        class EnemyBullet {
+            constructor(x, y, vx, vy) {
+                this.x = x;
+                this.y = y;
+                this.vx = vx;
+                this.vy = vy;
+                this.width = 4;
+                this.height = 4;
+                this.active = true;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.y > LOGICAL_HEIGHT + 10 || this.x < -10 || this.x > LOGICAL_WIDTH + 10) {
+                    this.active = false;
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = '#ef4444'; // Dangerous red plasma enemy orbs
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 3, 0, Math.PI*2);
+                ctx.fill();
+            }
+        }
+    </script>
+
+    <script>
+        // High-Fidelity Retro Particulate Physics Emitter Engine
+        class Particle {
+            constructor(x, y, type, speedMultiplier = 1.0) {
+                this.x = x;
+                this.y = y;
+                this.type = type; // 'debris', 'smoke', 'digital', 'wing', 'ring'
+                this.life = 1.0;
+                
+                // Set parameters based on user's exact aesthetic preference proportions
+                if (type === 'debris') {
+                    // Military Metal shards (70% proportion visual)
+                    this.vx = (Math.random() - 0.5) * 5 * speedMultiplier;
+                    this.vy = (Math.random() - 0.5) * 5 * speedMultiplier;
+                    this.color = Math.random() > 0.4 ? '#94a3b8' : '#e2e8f0'; // Gray/steel fragments
+                    this.size = 2 + Math.random() * 3;
+                    this.decay = 0.05 + Math.random() * 0.02; // Fast decay (0.15s - 0.2s duration)
+                } 
+                else if (type === 'smoke') {
+                    // Heavy black thermal clouds
+                    this.vx = (Math.random() - 0.5) * 1.5;
+                    this.vy = -Math.random() * 2;
+                    this.color = 'rgba(30, 41, 59, 0.7)'; // Charcoal/black ash
+                    this.size = 8 + Math.random() * 12;
+                    this.decay = 0.03 + Math.random() * 0.02;
+                } 
+                else if (type === 'digital') {
+                    // Advanced Korean Cyber Holo elements (Taegeuk Cyan / Cyber Red 20%)
+                    this.vx = (Math.random() - 0.5) * 7;
+                    this.vy = (Math.random() - 0.5) * 7;
+                    this.color = Math.random() > 0.5 ? '#22d3ee' : '#ef4444'; // Neon cyan / Taegeuk red
+                    this.size = 3;
+                    this.decay = 0.15; // 0.1s ultra-rapid flicker
+                    this.char = Math.random() > 0.5 ? '0' : '1';
+                }
+                else if (type === 'wing') {
+                    // Broken fuselage panels
+                    this.vx = (Math.random() > 0.5 ? 2.5 : -2.5) + (Math.random() - 0.5);
+                    this.vy = -1 + Math.random() * 3;
+                    this.color = '#475569';
+                    this.size = 6;
+                    this.decay = 0.04;
+                    this.rotation = Math.random() * Math.PI;
+                    this.rotSpeed = (Math.random() - 0.5) * 0.2;
+                }
+                else if (type === 'ring') {
+                    // Expanding kinetic shockwave rings (10% Cinematic proportion)
+                    this.vx = 0;
+                    this.vy = 0;
+                    this.size = 5;
+                    this.color = 'rgba(255, 255, 255, 0.8)';
+                    this.decay = 0.08;
+                }
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+                if (this.type === 'ring') {
+                    this.size += 6; // Fast expansion radial wave
+                }
+                if (this.type === 'wing') {
+                    this.rotation += this.rotSpeed;
+                }
+            }
+
+            draw() {
+                if (this.life <= 0) return;
+                ctx.save();
+                ctx.globalAlpha = this.life;
+
+                if (this.type === 'debris') {
+                    ctx.fillStyle = this.color;
+                    ctx.fillRect(this.x - this.size/2, this.y - this.size/2, this.size, this.size);
+                } 
+                else if (this.type === 'smoke') {
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                } 
+                else if (this.type === 'digital') {
+                    ctx.fillStyle = this.color;
+                    ctx.font = '8px monospace';
+                    ctx.fillText(this.char, this.x, this.y);
+                }
+                else if (this.type === 'wing') {
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.rotation);
+                    ctx.fillStyle = this.color;
+                    ctx.fillRect(-this.size, -this.size/3, this.size * 2, this.size / 1.5);
+                }
+                else if (this.type === 'ring') {
+                    ctx.strokeStyle = this.color;
+                    ctx.lineWidth = 2 * this.life;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+
+                ctx.restore();
+            }
+        }
+
+        // KF-21 Homed Missile Vector
+        class HomingMissile {
+            constructor(startX, startY, target) {
+                this.x = startX;
+                this.y = startY;
+                this.target = target;
+                this.speed = 1.0;
+                this.active = true;
+                this.angle = -Math.PI / 2;
+                this.accel = 0.45;
+                this.maxSpeed = 11;
+            }
+
+            update() {
+                if (!this.target || !this.target.active) {
+                    // Search for a new active target or go straight up
+                    const activeEnemies = enemies.filter(e => e.active);
+                    if (activeEnemies.length > 0) {
+                        this.target = activeEnemies[0];
+                    } else {
+                        this.y -= this.maxSpeed;
+                        if (this.y < -20) this.active = false;
+                        return;
+                    }
+                }
+
+                // Vector math aiming towards locked enemy
+                const dx = this.target.x - this.x;
+                const dy = this.target.y - this.y;
+                const dist = Math.hypot(dx, dy);
+
+                if (dist < 15) {
+                    // Detonating on contact
+                    this.active = false;
+                    destroySingleEnemy(this.target, 1.3);
+                } else {
+                    const targetAngle = Math.atan2(dy, dx);
+                    this.angle += (targetAngle - this.angle) * 0.18; // smooth curve steering
+                    this.speed = Math.min(this.maxSpeed, this.speed + this.accel);
+                    this.x += Math.cos(this.angle) * this.speed;
+                    this.y += Math.sin(this.angle) * this.speed;
+
+                    // Sparkle fire trail
+                    particles.push(new Particle(this.x, this.y, 'digital', 0.2));
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle + Math.PI/2);
+
+                // High Tech Korean Tactical Missile Vector shape
+                ctx.fillStyle = '#f8fafc';
+                ctx.fillRect(-2, -10, 4, 15);
+                ctx.fillStyle = '#ef4444'; // Red active guidance nose cone
+                ctx.beginPath();
+                ctx.moveTo(-2, -10);
+                ctx.lineTo(0, -15);
+                ctx.lineTo(2, -10);
+                ctx.fill();
+
+                // Bright yellow fire trail
+                ctx.fillStyle = '#f59e0b';
+                ctx.fillRect(-1, 5, 2, 6);
+
+                ctx.restore();
+            }
+        }
+    </script>
+
+    <script>
+        // Trigger 1. Base Enemy Kill (0.15 - 0.2s quick satisfying burst)
+        function destroySingleEnemy(enemy, scaleMultiplier = 1.0) {
+            if (!enemy.active) return;
+            enemy.active = false;
+
+            // Instantly pop a fast tactical ring wave
+            particles.push(new Particle(enemy.x, enemy.y, 'ring'));
+
+            // 70% Metal Fragments & quick Spark
+            for (let i = 0; i < 8; i++) {
+                particles.push(new Particle(enemy.x, enemy.y, 'debris', scaleMultiplier));
+            }
+            // Wing shear
+            particles.push(new Particle(enemy.x, enemy.y, 'wing', scaleMultiplier));
+            
+            // Black Smoke trail
+            for (let i = 0; i < 4; i++) {
+                particles.push(new Particle(enemy.x, enemy.y, 'smoke', scaleMultiplier));
+            }
+
+            // 20% Hologram Digital elements (Disappear inside 0.1s due to rapid decay)
+            for (let i = 0; i < 5; i++) {
+                particles.push(new Particle(enemy.x, enemy.y, 'digital', scaleMultiplier));
+            }
+
+            // Game Scoring & Kill Combo Logic
+            gameState.score += enemy.points;
+            gameState.combo++;
+            if (gameState.combo > gameState.maxCombo) {
+                gameState.maxCombo = gameState.combo;
+            }
+
+            // Increment AESA overkill gauge dynamically
+            gameState.aesaCharge = Math.min(100, gameState.aesaCharge + 4);
+            updateUI();
+
+            // Evaluate Pilot Kill streaks
+            checkStreakAchievements();
+        }
+
+        // Trigger 2. Formation Multi Chain Kill ("Pang! ↘ Pang! ↘ Pang! ↘" sequence)
+        function triggerChainKillSequence(enemyGroup) {
+            let delayTime = 0;
+            let pitchScale = 1.0;
+
+            enemyGroup.forEach((enemy) => {
+                if (!enemy.active) return;
+                
+                setTimeout(() => {
+                    if (!gameState.running && enemyGroup.length < 5) return; // ignore during game reset unless cheat panel
+                    
+                    // Trigger sound pitch cascade
+                    AudioSys.playKill(pitchScale);
+                    
+                    // Score visual popping indicator
+                    spawnFloatingScore(enemy.x, enemy.y, `+${enemy.points} x${pitchScale.toFixed(1)}`);
+                    
+                    // Execute base structural breakdown
+                    destroySingleEnemy(enemy, 1.1);
+
+                    // screen shake intensity scaling
+                    gameState.screenShake = 6 * pitchScale;
+
+                    // Increment pitch for next sequential hit to create rhythm
+                    pitchScale += 0.15;
+                }, delayTime);
+
+                delayTime += config.chainDelay; // Dynamic interval from user slider
+            });
+        }
+
+        // Trigger 3. KF-21 AESA Overkill Cinematic
+        function runAesaOverkillCinematic() {
+            if (gameState.aesaScanning) return;
+            gameState.aesaScanning = true;
+            gameState.aesaScanY = 0;
+            gameState.lockOnTargets = [];
+            gameState.lockOnTimer = 0;
+
+            AudioSys.playAesaRadar();
+
+            // Screen flashes briefly green to announce radar locking active
+            ctx.fillStyle = 'rgba(16, 185, 129, 0.15)';
+            ctx.fillRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+        }
+
+        // Execute actual multi missile firing
+        function executeAesaMissileBarrage() {
+            AudioSys.playLaunch();
+            
+            // Spawn micro homing missile for every target identified
+            gameState.lockOnTargets.forEach((target) => {
+                if (target.active) {
+                    homingMissiles.push(new HomingMissile(player.x, player.y - 15, target));
+                }
+            });
+
+            // Wipe tracking arrays and close cinematic locking state
+            gameState.lockOnTargets = [];
+            gameState.aesaScanning = false;
+            gameState.aesaCharge = 0;
+            updateUI();
+        }
+
+        // Trigger 5. Boss Mega Ground Slam Crash Boom
+        function triggerBossMegaBlast(x, y) {
+            AudioSys.playKill(0.5); // Deep rumble
+            gameState.screenShake = 40; // Mega shockwave
+
+            // Giant shockwave kinetic rings
+            for(let k=0; k<3; k++) {
+                setTimeout(() => {
+                    particles.push(new Particle(x, y, 'ring', 2.5));
+                }, k * 100);
+            }
+
+            // Extreme particle dispersion
+            for (let i = 0; i < 40; i++) {
+                particles.push(new Particle(x, y, 'debris', 3.0));
+                particles.push(new Particle(x, y, 'digital', 3.0));
+            }
+            for (let i = 0; i < 15; i++) {
+                particles.push(new Particle(x, y, 'smoke', 2.0));
+            }
+
+            gameState.score += 10000;
+            gameState.wave++;
+            gameState.combo += 10;
+            updateUI();
+            
+            spawnFloatingScore(x, y, "영공 완전 평정! +10,000");
+        }
+
+        // Display combo milestone visual messages on screen overlay
+        const floatingMessages = [];
+        function spawnFloatingMessage(text, color = '#3b82f6') {
+            floatingMessages.push({
+                text: text,
+                color: color,
+                y: LOGICAL_HEIGHT / 3,
+                opacity: 1.0,
+                scale: 1.5
+            });
+        }
+
+        const floatingScores = [];
+        function spawnFloatingScore(x, y, text) {
+            floatingScores.push({
+                x: x,
+                y: y,
+                text: text,
+                life: 1.0
+            });
+        }
+
+        function checkStreakAchievements() {
+            if (gameState.combo === 20) {
+                spawnFloatingMessage("ACE", "#3b82f6");
+            } else if (gameState.combo === 50) {
+                spawnFloatingMessage("AIR SUPERIORITY", "#f59e0b");
+            } else if (gameState.combo === 100) {
+                spawnFloatingMessage("SKY DOMINATOR", "#ef4444");
+            }
+        }
+    </script>
+
+    <script>
+        // Grid setup for default wave formations (Similar to standard Galaga patterns)
+        function spawnWave(waveNum) {
+            enemies = [];
+            enemyBullets = [];
+            
+            // Set tactical text zone
+            const zones = ["SEOUL AIR DEFENSE LINE", "YELLOW SEA PATROL ZONE", "EAST SEA DEFENSE LINE", "DMZ NO-FLY BORDER"];
+            document.getElementById('currentZone').innerText = zones[waveNum % zones.length];
+
+            // If wave is multiple of 3, spawn Boss battle instead
+            if (waveNum % 3 === 0) {
+                const boss = new BossAircraft();
+                enemies.push(boss);
+                gameState.bossSpawned = true;
+                spawnFloatingMessage("WARNING: BOSS INTRUSION", "#ef4444");
+                return;
+            }
+
+            // Standard formation grids
+            const cols = 6;
+            const rows = 3;
+            const startX = 65;
+            const startY = 60;
+            const spacingX = 60;
+            const spacingY = 40;
+
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const ex = startX + c * spacingX;
+                    const ey = startY + r * spacingY;
+                    const enemy = new Enemy(ex, ey, c, r);
+                    enemies.push(enemy);
+                }
+            }
+        }
+    </script>
+
+    <script>
+        // SANDBOX CHEATS INTEGRATION - Play visual cues directly on click even during start screens
+        document.getElementById('cheatNormalExplosion').addEventListener('click', () => {
+            AudioSys.init();
+            AudioSys.playKill(1.0);
+            
+            // Create a dummy explosion target in center of canvas
+            const dummyX = LOGICAL_WIDTH / 2;
+            const dummyY = LOGICAL_HEIGHT / 2 - 50;
+            
+            particles.push(new Particle(dummyX, dummyY, 'ring'));
+            for(let i=0; i<8; i++) particles.push(new Particle(dummyX, dummyY, 'debris', 1.0));
+            particles.push(new Particle(dummyX, dummyY, 'wing', 1.0));
+            for(let i=0; i<4; i++) particles.push(new Particle(dummyX, dummyY, 'smoke', 1.0));
+            for(let i=0; i<6; i++) particles.push(new Particle(dummyX, dummyY, 'digital', 1.0));
+        });
+
+        document.getElementById('cheatChainExplosion').addEventListener('click', () => {
+            AudioSys.init();
+            // Generate a row of 6 targets sequentially blowing up
+            const dummyGroup = [];
+            for (let i = 0; i < 6; i++) {
+                dummyGroup.push({
+                    x: 60 + i * 65,
+                    y: LOGICAL_HEIGHT / 2 - 100,
+                    points: 100 * (i + 1),
+                    active: true
+                });
+            }
+            triggerChainKillSequence(dummyGroup);
+        });
+
+        document.getElementById('cheatAesaOverkill').addEventListener('click', () => {
+            AudioSys.init();
+            
+            // Spawn 5 fresh test targets if not already loaded, then trigger scanning lock-ons
+            if (enemies.length === 0) {
+                for (let i = 0; i < 5; i++) {
+                    const e = new Enemy(70 + i * 75, 120, i, 0);
+                    e.isEntering = false;
+                    enemies.push(e);
+                }
+            }
+            runAesaOverkillCinematic();
+        });
+
+        document.getElementById('cheatBossSpawn').addEventListener('click', () => {
+            AudioSys.init();
+            
+            // Force boss stage 5 sequence
+            enemies = [];
+            const boss = new BossAircraft();
+            boss.isEntering = false;
+            boss.y = 120;
+            enemies.push(boss);
+            gameState.bossSpawned = true;
+            
+            // Immediately trigger boss crash destruction to show off the gorgeous 5-step animation
+            setTimeout(() => {
+                boss.triggerDestroy();
+            }, 600);
+        });
+    </script>
+
+    <script>
+        // System Containers
+        let player = new Player();
+        let bullets = [];
+        let enemyBullets = [];
+        let enemies = [];
+        let particles = [];
+        let homingMissiles = [];
+        let background = new Background();
+
+        function updateUI() {
+            document.getElementById('scoreDisplay').innerText = String(gameState.score).padStart(6, '0');
+            document.getElementById('comboDisplay').innerText = gameState.maxCombo;
+            document.getElementById('waveDisplay').innerText = `WAVE ${gameState.wave}`;
+            document.getElementById('aesaChargeText').innerText = `${gameState.aesaCharge}%`;
+            document.getElementById('aesaBar').style.width = `${gameState.aesaCharge}%`;
+        }
+
+        function resetGame() {
+            player = new Player();
+            bullets = [];
+            enemyBullets = [];
+            enemies = [];
+            particles = [];
+            homingMissiles = [];
+            background = new Background();
+            
+            gameState.score = 0;
+            gameState.combo = 0;
+            gameState.maxCombo = 0;
+            gameState.wave = 1;
+            gameState.aesaCharge = 0;
+            gameState.screenShake = 0;
+            gameState.aesaScanning = false;
+            gameState.bossSpawned = false;
+            
+            updateUI();
+            spawnWave(gameState.wave);
+        }
+
+        // Main Draw & Update Core Game Mechanics
+        function mainLoop() {
+            ctx.clearRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+
+            // 1. Process Visual Camera Screen Shake physics
+            ctx.save();
+            if (gameState.screenShake > 0) {
+                const dx = (Math.random() - 0.5) * gameState.screenShake * config.screenShakeMultiplier;
+                const dy = (Math.random() - 0.5) * gameState.screenShake * config.screenShakeMultiplier;
+                ctx.translate(dx, dy);
+                gameState.screenShake *= 0.9; // decay shake
+                if (gameState.screenShake < 0.2) gameState.screenShake = 0;
+            }
+
+            // 2. Background landscape
+            background.update();
+            background.draw();
+
+            if (gameState.running) {
+                // 3. Player loop
+                player.update();
+                player.draw();
+
+                // 4. Overkill check - If AESA scan hits 100%, trigger automatic lock-on sequence
+                if (gameState.aesaCharge >= 100 && !gameState.aesaScanning) {
+                    runAesaOverkillCinematic();
+                }
+
+                // 5. Normal bullet updates
+                bullets.forEach(b => {
+                    b.update();
+                    b.draw();
+                });
+                bullets = bullets.filter(b => b.active);
+
+                // 6. Enemy bullets
+                enemyBullets.forEach(eb => {
+                    eb.update();
+                    eb.draw();
+
+                    // Check impact collision against Player KF-21
+                    if (eb.active && Math.hypot(eb.x - player.x, eb.y - player.y) < 16) {
+                        eb.active = false;
+                        gameState.screenShake = 12;
+                        
+                        // Player hit: Trigger fast explosion & end game (retro high stakes mode!)
+                        for(let i=0; i<15; i++) {
+                            particles.push(new Particle(player.x, player.y, 'debris', 1.5));
+                        }
+                        AudioSys.playKill(0.6);
+                        
+                        gameState.running = false;
+                        document.getElementById('finalScore').innerText = gameState.score;
+                        document.getElementById('finalCombo').innerText = gameState.maxCombo;
+                        document.getElementById('finalWaves').innerText = gameState.wave;
+                        document.getElementById('gameOverScreen').classList.remove('hidden');
+                    }
+                });
+                enemyBullets = enemyBullets.filter(eb => eb.active);
+
+                // 7. Tactical Scanning cinematic processing
+                if (gameState.aesaScanning) {
+                    gameState.aesaScanY += 7; // speed of scanning line
+                    
+                    // Draw neon sweeping green radar scanning laser
+                    ctx.strokeStyle = '#22c55e';
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = '#22c55e';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(0, gameState.aesaScanY);
+                    ctx.lineTo(LOGICAL_WIDTH, gameState.aesaScanY);
+                    ctx.stroke();
+                    ctx.shadowBlur = 0; // reset
+
+                    // Detect and tag targets as scanning line descends
+                    enemies.forEach(e => {
+                        if (e.active && !e.isDestroying && Math.abs(e.y - gameState.aesaScanY) < 10) {
+                            if (!gameState.lockOnTargets.includes(e)) {
+                                gameState.lockOnTargets.push(e);
+                                AudioSys.playLockOn();
+                            }
+                        }
+                    });
+
+                    // Draw Lock-On target square indicators
+                    gameState.lockOnTargets.forEach(target => {
+                        if (target.active) {
+                            ctx.strokeStyle = '#ef4444';
+                            ctx.lineWidth = 1.5;
+                            ctx.strokeRect(target.x - target.width/1.2, target.y - target.height/1.2, target.width*1.6, target.height*1.6);
+                            
+                            // Tactical brackets text
+                            ctx.fillStyle = '#ef4444';
+                            ctx.font = '8px Orbitron';
+                            ctx.fillText("LOCK-ON", target.x - 20, target.y - 22);
+                        }
+                    });
+
+                    // Check if scanline crossed entire screen
+                    if (gameState.aesaScanY >= LOGICAL_HEIGHT) {
+                        gameState.lockOnTimer++;
+                        // Hold 0.5 seconds at bottom to build maximum dramatic tension (0.5s = 30 frames)
+                        if (gameState.lockOnTimer > 30) {
+                            executeAesaMissileBarrage();
+                        }
+                    }
+                }
+
+                // 8. Homing Missiles update
+                homingMissiles.forEach(hm => {
+                    hm.update();
+                    hm.draw();
+                });
+                homingMissiles = homingMissiles.filter(hm => hm.active);
+
+                // 9. Processing active enemies & standard collision
+                let allEnemiesCleared = (enemies.length > 0);
+                
+                enemies.forEach(e => {
+                    if (!e.active) return;
+                    allEnemiesCleared = false;
+
+                    e.update();
+                    e.draw();
+
+                    // Check standard crash into player ship
+                    if (Math.hypot(e.x - player.x, e.y - player.y) < 22) {
+                        destroySingleEnemy(e, 1.0);
+                        gameState.screenShake = 15;
+                    }
+
+                    // Check manual laser bullet impact
+                    bullets.forEach(b => {
+                        if (b.active && Math.hypot(b.x - e.x, b.y - e.y) < 18) {
+                            b.active = false;
+                            
+                            if (e.isBoss) {
+                                e.health--;
+                                AudioSys.playLockOn(); // rapid tick metal sound
+                                if (e.health <= 0) {
+                                    e.triggerDestroy();
+                                }
+                            } else {
+                                destroySingleEnemy(e, 1.0);
+                                AudioSys.playKill(1.1);
+                            }
+                        }
+                    });
+                });
+
+                // Auto sweep dead references
+                enemies = enemies.filter(e => e.active || e.isBoss);
+
+                // If wave is completely cleared, advance next stage
+                if (enemies.length === 0 && !gameState.bossSpawned) {
+                    gameState.wave++;
+                    updateUI();
+                    spawnWave(gameState.wave);
+                    spawnFloatingMessage(`작전구역 통제 완료 - WAVE ${gameState.wave}`, "#10b981");
+                }
+            }
+
+            // 10. Floating scores + combo visual text
+            floatingScores.forEach(fs => {
+                fs.y -= 1.2;
+                fs.life -= 0.02;
+                ctx.fillStyle = `rgba(34, 211, 238, ${fs.life})`;
+                ctx.font = '9px Orbitron';
+                ctx.fillText(fs.text, fs.x - 15, fs.y);
+            });
+            floatingScores.forEach((fs, i) => { if (fs.life <= 0) floatingScores.splice(i, 1); });
+
+            // Processing Cinematic Combo overlay text
+            floatingMessages.forEach(fm => {
+                fm.opacity -= 0.015;
+                ctx.fillStyle = fm.color;
+                ctx.globalAlpha = fm.opacity;
+                ctx.font = 'bold 24px Orbitron';
+                ctx.textAlign = 'center';
+                ctx.fillText(fm.text, LOGICAL_WIDTH / 2, fm.y);
+                ctx.textAlign = 'start'; // reset
+                ctx.globalAlpha = 1.0;
+            });
+            floatingMessages.forEach((fm, i) => { if (fm.opacity <= 0) floatingMessages.splice(i, 1); });
+
+            // 11. Run particle loops
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            particles = particles.filter(p => p.life > 0);
+
+            ctx.restore(); // Restore shaking context offsets
+            requestAnimationFrame(mainLoop);
+        }
+
+        // DOM Interaction logic
+        document.getElementById('startGameBtn').addEventListener('click', () => {
+            AudioSys.init();
+            document.getElementById('startScreen').classList.add('hidden');
+            gameState.running = true;
+            resetGame();
+        });
+
+        document.getElementById('restartGameBtn').addEventListener('click', () => {
+            document.getElementById('gameOverScreen').classList.add('hidden');
+            gameState.running = true;
+            resetGame();
+        });
+
+        // Initialize Loop
+        requestAnimationFrame(mainLoop);
+    </script>
+</body>
+</html>
